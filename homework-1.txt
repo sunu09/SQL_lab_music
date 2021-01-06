@@ -1,0 +1,151 @@
+
+STEP 1 - Download github file - https://github.com/techtalentsouth/Example-Databases/blob/master/my_ipod.sqlite3
+STEP 2 - OPEN DOWNLOADED FILE FILE ON - https://sqliteonline.com/
+
+STEP 3 - CREATE user AND favorite TABLES
+
+CREATE TABLE User
+(
+	UserID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
+	FirstName VARCHAR NOT NULL,
+	LastName VARCHAR NOT NULL,
+	Birthplace VARCHAR NOT NULL,
+	CreatedAt DATETIME NOT NULL,
+	UpdatedAt DATETIME NULL
+);
+
+CREATE TABLE Favorite 
+(
+	FavoriteID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
+	UserID INTEGER NOT NULL,
+	ArtistID INTEGER, 
+	AlbumID INTEGER,
+	SongID INTEGER,
+	GenreID INTEGER,
+	CreatedAt DATETIME NOT NULL,
+	UpdatedAt DATETIME NULL,
+	FOREIGN KEY (UserID) REFERENCES User (UserID),
+	FOREIGN KEY (ArtistID) REFERENCES artists (id),
+	FOREIGN KEY (AlbumID) REFERENCES albums (id), 
+	FOREIGN KEY (SongID) REFERENCES songs (id),
+	FOREIGN KEY (GenreID) REFERENCES genres (id)
+);
+
+STEP 4: 
+
+INSERT INTO User 
+(
+	FirstName,
+  	LastName,
+  	Birthplace,
+  	CreatedAt
+)
+VALUES 
+(
+	'Florence',
+  	'Griffith-Joyner',
+  	'Littlerock, California',
+  	CURRENT_TIMESTAMP
+),
+(
+	'Tom',
+  	'Brady',
+  	'San Mateo, California',
+  	CURRENT_TIMESTAMP
+),
+(
+	'Hambo',
+  	'Slambo',
+  	'Human Town, Earth',
+  	CURRENT_TIMESTAMP
+),
+(
+	'Junky',
+  	'MyBunky',
+  	'Universal Studios, Antartica',
+  	CURRENT_TIMESTAMP
+),
+(
+	'Braverton',
+  	'Tunglebunny',
+  	'Under the River, Borneo',
+  	CURRENT_TIMESTAMP
+),
+(
+	'Hats',
+  	'UndBats',
+  	'Torrential Downpour, Wherever',
+  	CURRENT_TIMESTAMP
+),
+(
+	'Kablewy',
+  	'The Honkey Tonk Kid',
+  	'Around, Thereabouts',
+  	CURRENT_TIMESTAMP
+),
+(
+	'Slade',
+  	'InTheShade',
+  	'Get Up And Dance, Texas',
+  	CURRENT_TIMESTAMP
+),
+(
+	'Spumbledum',
+  	'McDunderspun',
+  	'Sploogetyblerg, USA',
+  	CURRENT_TIMESTAMP
+),
+(
+	'Believe',
+  	'Me',
+  	'Youhadyourchance, Buddy',
+  	CURRENT_TIMESTAMP
+);
+
+
+STEP 5: 
+-- Add an entry to the Favorite table for each user:
+
+INSERT INTO Favorite (UserID, CreatedAt) 
+
+  SELECT UserID, CreatedAt FROM User
+
+STEP 6:
+-- #1 - After adding a favorites entry for each user, this will add actual data for the users
+
+UPDATE Favorite 
+    SET ArtistID = 1, AlbumID = 2, SongID = 3, GenreID = 4, UpdatedAt = CURRENT_TIMESTAMP
+    WHERE UserID <13;
+
+	UPDATE Favorite 
+    SET ArtistID = null, AlbumID = null, SongID = null, GenreID = null, UpdatedAt = null
+    WHERE UserID >=13;
+    
+    SELECT * FROM Favorite;
+
+
+STEP 7:
+-- #2 - List all of the users and their favorite things
+SELECT 
+User.FirstName, 
+User.LastName, 
+(SELECT name FROM artists WHERE id = Favorite.ArtistID) AS 'Fav Artist', 
+(SELECT name FROM albums WHERE id = Favorite.AlbumID) AS 'Fav Album', 
+(SELECT name FROM songs WHERE id = Favorite.SongID) AS 'Fav Song', 
+(SELECT name FROM genres WHERE id = Favorite.GenreID) AS 'Fav Genre'
+from User
+LEFT JOIN Favorite ON User.UserId = Favorite.UserId;
+
+STEP 8:
+-- #3 - List all of the albums that have total length > 5mins (based on song lengths)
+SELECT
+    albums.name,
+    albums.id,
+    SUM(songs.length)
+FROM 
+    albums
+LEFT JOIN songs on songs.album_id = albums.id
+GROUP BY
+    albums.name
+HAVING
+    SUM(songs.length) > 5
